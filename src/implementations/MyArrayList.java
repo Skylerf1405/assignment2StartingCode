@@ -1,5 +1,7 @@
 package implementations;
 
+import java.util.NoSuchElementException;
+
 import utilities.Iterator;
 import utilities.ListADT;
 
@@ -23,21 +25,23 @@ public class MyArrayList<E> implements ListADT<E>
 	public MyArrayList() 
 	{
 		array = (E[]) new Object[Capacity];
+		size = 0;
 	}
 
 	@Override
 	public int size()
 	{
-		// TODO Auto-generated method stub
 		return size;
 	}
 
 	@Override
 	public void clear()
 	{
-		// TODO Auto-generated method stub
-		return 
-		
+		for(int i = 0; i < size; i++)
+		{
+			array[i] = null;
+		}
+		size = 0; 
 	}
 
 	@Override
@@ -80,9 +84,6 @@ public class MyArrayList<E> implements ListADT<E>
 			
 			array = newArray; 
 		}
-		
-			
-		
 	}
 
 	@Override
@@ -93,77 +94,174 @@ public class MyArrayList<E> implements ListADT<E>
 		}
 		checkCapacity(); 
 		array[size++] = toAdd;
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean addAll(ListADT<? extends E> toAdd) throws NullPointerException
 	{
-		// TODO Auto-generated method stub
-		return false;
+		if (toAdd == null)
+		{
+			throw new NullPointerException();
+		}
+		
+		boolean modified = false;
+		for(int i = 0; i < toAdd.size(); i++)
+		{
+			add(toAdd.get(i));
+			modified = true;
+		}
+		return modified; 
 	}
 
 	@Override
 	public E get(int index) throws IndexOutOfBoundsException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (index < 0 || index >= size)
+		{
+			throw new IndexOutOfBoundsException();
+		}
+		return array[index];
 	}
 
 	@Override
 	public E remove(int index) throws IndexOutOfBoundsException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (index < 0 || index >= size)
+		{
+			throw new IndexOutOfBoundsException();
+		}
+		
+		E element = array[index];
+		for (int i = index; i < size -1; i++)
+		{
+			array[i] = array[i + 1];
+		}
+		array[size - 1] = null;
+		size--;
+		return element; 
 	}
 
 	@Override
 	public E remove(E toRemove) throws NullPointerException
 	{
-		// TODO Auto-generated method stub
+		if (toRemove == null)
+		{
+			throw new NullPointerException();
+		}
+		
+		for( int i =0; i < size; i++)
+		{
+			if(toRemove.equals(array[i]))
+			{
+				return remove(i);
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public E set(int index, E toChange) throws NullPointerException, IndexOutOfBoundsException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (toChange == null)
+		{
+			throw new NullPointerException();
+		}
+		if (index < 0 || index >= size)
+		{
+			throw new IndexOutOfBoundsException();
+		}
+		
+		E oldElement = array[index];
+		array[index] = toChange;
+		return oldElement; 
 	}
 
 	@Override
 	public boolean isEmpty()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return size == 0;
 	}
 
 	@Override
 	public boolean contains(E toFind) throws NullPointerException
 	{
-		// TODO Auto-generated method stub
+		if (toFind == null)
+		{
+			throw new NullPointerException();
+		}
+		
+		for (int i = 0; i < size; i++)
+		{
+			if (toFind.equals(array[i]))
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public E[] toArray(E[] toHold) throws NullPointerException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (toHold == null)
+		{
+			throw new NullPointerException();
+		}
+		if (toHold.length < size) {
+		    toHold = (E[]) java.lang.reflect.Array.newInstance(toHold.getClass().getComponentType(), size);
+		}
+		for (int i = 0; i < size; i++) {
+		    toHold[i] = array[i];
+		}
+		return toHold;
+
 	}
 
 	@Override
 	public Object[] toArray()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Object[] result = new Object[size];
+		for (int i = 0; i < size; i++)
+		{
+			result[i] = array[i];
+		}
+		return result; 
 	}
 
 	@Override
 	public Iterator<E> iterator()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayListIterator(); 
+	}
+	
+	private class ArrayListIterator implements Iterator<E> 
+	{
+		private int current = 0;
+		private E[] iteratorArray;
+		
+		public ArrayListIterator()
+		{
+			iteratorArray = (E[]) new Object[size];
+			for (int i =0; i < size; i++) 
+			{
+				iteratorArray[i] = array[i];
+			}
+		}
+		
+		@Override
+		public boolean hasNext()
+		{
+			return current < size; 
+		}
+		
+		@Override
+        public E next() throws NoSuchElementException {
+            if(!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return iteratorArray[current++];
+        }
 	}
 
 }

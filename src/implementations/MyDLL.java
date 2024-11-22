@@ -1,3 +1,7 @@
+/**
+ * Implementation of ListADT using a doubly linked list.
+ */
+
 package implementations;
 
 import java.util.NoSuchElementException;

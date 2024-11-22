@@ -1,3 +1,7 @@
+/**
+ * Implementation of ListADT using an array as the data structure.
+ */
+
 package implementations;
 
 import java.util.NoSuchElementException;

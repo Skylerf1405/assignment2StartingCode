@@ -1,3 +1,7 @@
+/**
+ * Node class for the doubly linked list implementation.
+ */
+
 package implementations;
 
 public class MyDLLNode<E>

@@ -36,19 +36,14 @@ public class AppDomain {
         
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
-            int lineNumber = 0;
-            
             while ((line = reader.readLine()) != null) {
-                lineNumber++;
-                processLine(line, lineNumber);
+                processLine(line);
             }
             
-            // Process remaining stack items
             while (!stack.isEmpty()) {
                 errorQ.enqueue(stack.pop());
             }
             
-            // Report errors
             reportErrors();
             
         } catch (IOException e) {
@@ -56,15 +51,13 @@ public class AppDomain {
         }
     }
     
-    private static void processLine(String line, int lineNumber) {
-        // Pattern for XML tags
+    private static void processLine(String line) {
         Pattern tagPattern = Pattern.compile("</?[^>]+/?>");
         Matcher matcher = tagPattern.matcher(line);
         
         while (matcher.find()) {
             String tag = matcher.group();
             
-            // Ignore processing instructions
             if (tag.startsWith("<?") && tag.endsWith("?>")) {
                 continue;
             }
@@ -74,15 +67,14 @@ public class AppDomain {
                 continue;
             }
             
-            // Check if it's an end tag
+            // end tag
             if (tag.startsWith("</")) {
                 String tagName = tag.substring(2, tag.length() - 1);
-                processEndTag(tagName, lineNumber);
+                processEndTag(tagName);
             }
             // Start tag
             else if (tag.startsWith("<")) {
                 String tagName = tag.substring(1, tag.length() - 1);
-                // Remove attributes if present
                 if (tagName.contains(" ")) {
                     tagName = tagName.substring(0, tagName.indexOf(" "));
                 }
@@ -91,36 +83,37 @@ public class AppDomain {
         }
     }
     
-    private static void processEndTag(String tagName, int lineNumber) {
+    private static void processEndTag(String tagName) {
         if (stack.isEmpty()) {
             extrasQ.enqueue(tagName);
-        } else {
-            String top = stack.peek();
-            if (tagName.equals(top)) {
-                stack.pop();
-            } else if (!errorQ.isEmpty() && tagName.equals(errorQ.peek())) {
-                errorQ.dequeue();
-            } else {
-                boolean found = false;
-                MyStack<String> tempStack = new MyStack<>();
-                
-                while (!stack.isEmpty()) {
-                    String current = stack.pop();
-                    if (current.equals(tagName)) {
-                        found = true;
-                        break;
-                    }
-                    tempStack.push(current);
-                    errorQ.enqueue(current);
-                }
-                
-                if (!found) {
-                    extrasQ.enqueue(tagName);
-                }
-                
-                while (!tempStack.isEmpty()) {
-                    stack.push(tempStack.pop());
-                }
+            return;
+        }
+
+        String top = stack.peek();
+        if (tagName.equals(top)) {
+            stack.pop();
+            return;
+        }
+
+        // Search stack for matching tag
+        MyStack<String> tempStack = new MyStack<>();
+        boolean found = false;
+        
+        while (!stack.isEmpty()) {
+            String current = stack.pop();
+            if (current.equals(tagName)) {
+                found = true;
+                break;
+            }
+            errorQ.enqueue(current);
+            tempStack.push(current);
+        }
+        
+        // If no match found- closing tag
+        if (!found) {
+            extrasQ.enqueue(tagName);
+            while (!tempStack.isEmpty()) {
+                stack.push(tempStack.pop());
             }
         }
     }
@@ -128,7 +121,7 @@ public class AppDomain {
     private static void reportErrors() {
         boolean hasErrors = false;
         
-        if (!hasErrors && stack.size() > 1) {
+        if (stack.size() > 1) {
             System.out.println("Error: Multiple root elements found");
             hasErrors = true;
         }

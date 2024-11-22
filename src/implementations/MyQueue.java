@@ -1,5 +1,5 @@
 /**
- * Implementation of StackADT using MyDLL.
+ * Implementation of ADT using MyDLL as the underlying data structure.
  */
 
 package implementations;
@@ -9,14 +9,6 @@ import utilities.Iterator;
 import utilities.QueueADT;
 import java.util.NoSuchElementException;
 
-/**
- * Implementation of QueueADT using MyDLL as the underlying data structure.
- * Supports standard queue operations with FIFO (First-In-First-Out) behavior.
- *
- * @author yourGroup
- * @version 1.0
- * @param <E> The type of elements this queue holds
- */
 public class MyQueue<E> implements QueueADT<E> {
     private MyDLL<E> list;
     
